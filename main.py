@@ -20,9 +20,15 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "format": "best"
         }
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
+        print("Starting download...")
+
+with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    info = ydl.extract_info(url, download=True)
+
+print("Download finished")
+
+filename = ydl.prepare_filename(info)
+print(filename)
 
         await msg.edit_text("📤 جاري إرسال الفيديو...")
 
