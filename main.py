@@ -1,5 +1,6 @@
 import os
-import yt_dlp
+import glob
+import subprocess
 from telegram import Update, InputFile
 from telegram.ext import Application, MessageHandler, ContextTypes, filters
 
@@ -15,33 +16,22 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = await update.message.reply_text("⏳ جاري تحميل الفيديو...")
 
     try:
-        ydl_opts = {
-            "cookiefile": os.path.abspath("cookies.txt"),
-            "outtmpl": os.path.join(DOWNLOAD_DIR, "video.%(ext)s"),
-            "format": "best",
-            "noplaylist": True,
-            "quiet": False,
-            "merge_output_format": "mp4",
-        }
+        print("Starting download...")
 
-        import glob
-import subprocess
+        subprocess.run([
+            "yt-dlp",
+            "--cookies", os.path.abspath("cookies.txt"),
+            "-f", "best",
+            "-o", os.path.join(DOWNLOAD_DIR, "video.%(ext)s"),
+            url
+        ], check=True)
 
-print("Starting download...")
+        files = glob.glob(os.path.join(DOWNLOAD_DIR, "video.*"))
+        if not files:
+            raise Exception("Download failed")
 
-subprocess.run([
-    "yt-dlp",
-    "--cookies", os.path.abspath("cookies.txt"),
-    "-f", "best",
-    "-o", os.path.join(DOWNLOAD_DIR, "video.%(ext)s"),
-    url
-], check=True)
+        filename = files[0]
 
-files = glob.glob(os.path.join(DOWNLOAD_DIR, "video.*"))
-if not files:
-    raise Exception("Download failed")
-
-filename = files[0]
         print("Download finished")
         print(filename)
 
