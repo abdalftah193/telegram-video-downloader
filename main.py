@@ -29,9 +29,11 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
             filename = ydl.prepare_filename(info)
 
         print("Download finished")
-        print(filename)
+print(filename)
+print(os.path.getsize(filename))
 
-        await msg.edit_text("📤 جاري إرسال الفيديو...")
+await msg.edit_text("📤 جاري إرسال الفيديو...")
+print("Starting upload...")
 
         with open(filename, "rb") as video:
             await update.message.reply_video(
@@ -39,7 +41,9 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
     read_timeout=600,
     write_timeout=600,
     connect_timeout=60,
-            )
+)
+
+print("Upload finished")
 
         os.remove(filename)
 
