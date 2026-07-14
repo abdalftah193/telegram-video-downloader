@@ -16,19 +16,21 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         ydl_opts = {
-            "outtmpl": f"{DOWNLOAD_DIR}/%(title)s.%(ext)s",
-            "format": "best"
+            "cookiefile": os.path.abspath("cookies.txt"),
+            "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
+            "format": "best",
+            "noplaylist": True,
+            "quiet": True,
         }
 
         print("Starting download...")
 
-with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-    info = ydl.extract_info(url, download=True)
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info)
 
-print("Download finished")
-
-filename = ydl.prepare_filename(info)
-print(filename)
+        print("Download finished")
+        print(filename)
 
         await msg.edit_text("📤 جاري إرسال الفيديو...")
 
@@ -40,15 +42,21 @@ print(filename)
         await msg.delete()
 
     except Exception as e:
+        print(e)
         await msg.edit_text(f"❌ حدث خطأ:\n{e}")
 
 
-app = Application.builder().token(TOKEN).build()
+def main():
+    app = Application.builder().token(TOKEN).build()
 
-app.add_handler(
-    MessageHandler(filters.TEXT & ~filters.COMMAND, download)
-)
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, download)
+    )
 
-print("Bot Started...")
+    print("Bot Started...")
 
-app.run_polling()
+    app.run_polling()
+
+
+if __name__ == "__main__":
+    main()
