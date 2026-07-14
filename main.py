@@ -1,4 +1,5 @@
 import os
+import glob
 import yt_dlp
 from telegram import Update
 from telegram.ext import Application, MessageHandler, ContextTypes, filters
@@ -17,7 +18,7 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         ydl_opts = {
             "cookiefile": os.path.abspath("cookies.txt"),
-            "outtmpl": os.path.join(DOWNLOAD_DIR, "video.%(ext)s"),
+            "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
             "format": "best",
             "noplaylist": True,
         }
@@ -25,25 +26,27 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print("Starting download...")
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
+            ydl.download([url])
 
         print("Download finished")
-print(filename)
-print(os.path.getsize(filename))
 
-await msg.edit_text("📤 جاري إرسال الفيديو...")
-print("Starting upload...")
+        files = sorted(
+            glob.glob(os.path.join(DOWNLOAD_DIR, "*")),
+            key=os.path.getmtime
+        )
+
+        filename = files[-1]
+        print(filename)
+
+        await msg.edit_text("📤 جاري إرسال الفيديو...")
 
         with open(filename, "rb") as video:
             await update.message.reply_video(
-    video=video,
-    read_timeout=600,
-    write_timeout=600,
-    connect_timeout=60,
-)
-
-print("Upload finished")
+                video=video,
+                read_timeout=600,
+                write_timeout=600,
+                connect_timeout=60,
+            )
 
         os.remove(filename)
 
@@ -62,7 +65,6 @@ def main():
     )
 
     print("Bot Started...")
-
     app.run_polling()
 
 
