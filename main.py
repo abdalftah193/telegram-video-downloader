@@ -17,7 +17,7 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         ydl_opts = {
             "cookiefile": os.path.abspath("cookies.txt"),
-            "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
+            "outtmpl": os.path.join(DOWNLOAD_DIR, "video.%(ext)s"),
             "format": "best",
             "noplaylist": True,
         }
@@ -34,7 +34,12 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.edit_text("📤 جاري إرسال الفيديو...")
 
         with open(filename, "rb") as video:
-            await update.message.reply_video(video=video)
+            await update.message.reply_video(
+    video=video,
+    read_timeout=600,
+    write_timeout=600,
+    connect_timeout=60,
+            )
 
         os.remove(filename)
 
