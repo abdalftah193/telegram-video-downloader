@@ -20,7 +20,6 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "outtmpl": os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
             "format": "best",
             "noplaylist": True,
-            "quiet": True,
         }
 
         print("Starting download...")
