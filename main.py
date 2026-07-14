@@ -24,19 +24,24 @@ async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "merge_output_format": "mp4",
         }
 
-        print("Starting download...")
+        import glob
+import subprocess
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
+print("Starting download...")
 
-        if not os.path.exists(filename):
-            files = [
-                os.path.join(DOWNLOAD_DIR, f)
-                for f in os.listdir(DOWNLOAD_DIR)
-            ]
-            filename = max(files, key=os.path.getmtime)
+subprocess.run([
+    "yt-dlp",
+    "--cookies", os.path.abspath("cookies.txt"),
+    "-f", "best",
+    "-o", os.path.join(DOWNLOAD_DIR, "video.%(ext)s"),
+    url
+], check=True)
 
+files = glob.glob(os.path.join(DOWNLOAD_DIR, "video.*"))
+if not files:
+    raise Exception("Download failed")
+
+filename = files[0]
         print("Download finished")
         print(filename)
 
